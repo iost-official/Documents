@@ -1,5 +1,4 @@
-# Internet of Services: 
-# 新一代安全可扩展的线上服务生态系统
+# Internet of Services: 新一代安全可扩展的线上服务生态系统
 
 **IOS 基金会**
 
