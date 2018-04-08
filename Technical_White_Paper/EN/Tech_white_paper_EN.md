@@ -113,33 +113,33 @@ With the distributed randomness protocol (DRP) presented above, it is not diffic
 
 **Inputs:**
 
-1. $v$ is a view counter
-2. $i$ is a validator
-3. $sk_i$ is the private key for i
-4. $e$ is the current epoch
-5. $\Delta$ is the synchrony bound
+1. ![](http://latex.codecogs.com/gif.latex?\$v$) is a view counter
+2. ![](http://latex.codecogs.com/gif.latex?\$i$) is a validator
+3. ![](http://latex.codecogs.com/gif.latex?\$sk_i$) is the private key for ![](http://latex.codecogs.com/gif.latex?\$i$)
+4. ![](http://latex.codecogs.com/gif.latex?\$e$) is the current epoch
+5. ![](http://latex.codecogs.com/gif.latex?\$\\Delta$) is the synchrony bound
 
 
-**Output:** a validator $i$ which has the minimum-value valid lottery to run DRP
+**Output:** a validator ![](http://latex.codecogs.com/gif.latex?\$i$) which has the minimum-value valid lottery to run DRP
 
-1. For each $e$, each $i$ computes a lottery $lottery_{i,e,v}$ using Verifiable Random Function with its view $v$ and the node’s private key $sk_i$.
-2. Then for a time bound $\Delta$, the validators gossip these lotteries with each other. Each validator collects the top 3 minimum-value lottery in the gossip process.
-3. After the time bound $\Delta$, the validators fix the minimum-value valid lottery they have seen so far. 
+1. For each ![](http://latex.codecogs.com/gif.latex?\$e$), each ![](http://latex.codecogs.com/gif.latex?\$i$) computes a lottery ![](http://latex.codecogs.com/gif.latex?\$lottery_{i,e,v}$) using Verifiable Random Function with its view ![](http://latex.codecogs.com/gif.latex?\$v$) and the node’s private key ![](http://latex.codecogs.com/gif.latex?\$sk_i$).
+2. Then for a time bound ![](http://latex.codecogs.com/gif.latex?\$\\Delta$), the validators gossip these lotteries with each other. Each validator collects the top 3 minimum-value lottery in the gossip process.
+3. After the time bound ![](http://latex.codecogs.com/gif.latex?\$\\Delta$), the validators fix the minimum-value valid lottery they have seen so far. 
 4. The validator corresponding to the minimum-value valid lottery is elected as the leader, while the other two validators corresponding to the second and third minimum-value valid lottery are  used as the pool for back-up leaders.
-5. If the elected validator successfully runs the DRP, it broadcasts the output $rnd_e$ to all other validators with its correctness proof. 
-6. Each $i$ can use $rnd_e$ to compute a permutation and divide the result into $m$ buckets with same size, thus the mapping from nodes to shards is determined. 
-7. After the time bound $\Delta$, if the elected validator fails to start DRP, validators mark the current run as failed and exclude this leader in the rest of the epoch $e$. In this case,the back-up leader will be used to run DRP. If the two backup leaders fail continuously, the lottery will roll back to step 1 and the whole protocol will be rerun.
+5. If the elected validator successfully runs the DRP, it broadcasts the output ![](http://latex.codecogs.com/gif.latex?\$rnd_e$) to all other validators with its correctness proof. 
+6. Each ![](http://latex.codecogs.com/gif.latex?\$i$) can use ![](http://latex.codecogs.com/gif.latex?\$rnd_e$) to compute a permutation and divide the result into ![](http://latex.codecogs.com/gif.latex?\$m$) buckets with same size, thus the mapping from nodes to shards is determined. 
+7. After the time bound ![](http://latex.codecogs.com/gif.latex?\$\\Delta$), if the elected validator fails to start DRP, validators mark the current run as failed and exclude this leader in the rest of the epoch ![](http://latex.codecogs.com/gif.latex?\$e$). In this case,the back-up leader will be used to run DRP. If the two backup leaders fail continuously, the lottery will roll back to step 1 and the whole protocol will be rerun.
 
 ---
 
 ### Analysis
-The leader election mechanism provides required properties which is the same as those described in Section 4. Each validator can produce only a single valid lottery per view $v$ in a epoch $e$. The DRP design provides scalability. Since the private key $sk_i$ is kept secret, the output of VRF is unpredictable. Given our synchrony time bound $\Delta$, the lottery will be seen by all other validators within $\Delta$. If malicious nodes win the lottery, it cannot perform arbitrary behaviors -- either choose to cooperate and run the DRP protocol, or decide to fail the epoch. If any of the malicious/abnormal cases happens, the malicious nodes would be excluded from participating in the rest of the epoch.
+The leader election mechanism provides required properties which is the same as those described in Section 4. Each validator can produce only a single valid lottery per view ![](http://latex.codecogs.com/gif.latex?\$v$) in a epoch ![](http://latex.codecogs.com/gif.latex?\$e$). The DRP design provides scalability. Since the private key ![](http://latex.codecogs.com/gif.latex?\$sk_i$) is kept secret, the output of VRF is unpredictable. Given our synchrony time bound ![](http://latex.codecogs.com/gif.latex?\$\\Delta$), the lottery will be seen by all other validators within ![](http://latex.codecogs.com/gif.latex?\$\\Delta$). If malicious nodes win the lottery, it cannot perform arbitrary behaviors -- either choose to cooperate and run the DRP protocol, or decide to fail the epoch. If any of the malicious/abnormal cases happens, the malicious nodes would be excluded from participating in the rest of the epoch.
 
 
 ## Operability During Epoch Transitions 
-There are many shard configuration schemes, such as static configuration and some different rolling schemes. IOSChain uses a dynamical rolling scheme - it swaps out and in validators in batches for each epoch $e$. This configuration will give IOSChain an idle period that only after enough validators have bootstrapped appropriately, the network can begin processing transactions. Many designs of the blockchain did not take the issue that how to make sure the system is operational during this period into consideration. 
+There are many shard configuration schemes, such as static configuration and some different rolling schemes. IOSChain uses a dynamical rolling scheme - it swaps out and in validators in batches for each epoch ![](http://latex.codecogs.com/gif.latex?\$e$). This configuration will give IOSChain an idle period that only after enough validators have bootstrapped appropriately, the network can begin processing transactions. Many designs of the blockchain did not take the issue that how to make sure the system is operational during this period into consideration. 
 
-A key factor of the issue during the transition is the batch size, which is is highly relevant to the safety of the system. When the swap batch size grows, the risk increases as the number of remaining honest validators will not be sufficient to reach consensus. Another disadvantage of growing swap batch size is that the downloading and bootstrapping information will cause network stress increases. Given our threat model that there are at most $1/3$ malicious nodes, the maximum size of the swap batch should be less than $1/3$ nodes.
+A key factor of the issue during the transition is the batch size, which is is highly relevant to the safety of the system. When the swap batch size grows, the risk increases as the number of remaining honest validators will not be sufficient to reach consensus. Another disadvantage of growing swap batch size is that the downloading and bootstrapping information will cause network stress increases. Given our threat model that there are at most ![](http://latex.codecogs.com/gif.latex?\$1/3$) malicious nodes, the maximum size of the swap batch should be less than ![](http://latex.codecogs.com/gif.latex?\$1/3$) nodes.
 
 To maintain full operability during transition/idle phases, we use the method of selecting a subset of the validators to be swapped out and replaced with new members [8,24]. This is based on Omniledger’s approach [8]. It enables the remaining validators to continue offering services while the newly joined nodes are downloading history data and bootstrapping.  We present the node-to-shard transition assignment protocol - TransEpoch as follows.
 
@@ -149,23 +149,23 @@ To maintain full operability during transition/idle phases, we use the method of
 
 **Inputs:**
 
-1. $n$ is the total number of nodes
-2. $m$ is the size of each shard
-3. $k$ is the the swap-out batch size, i.e., the number of validators that will be swapped out at a given time in a given epoch. 
+1. ![](http://latex.codecogs.com/gif.latex?\$n$) is the total number of nodes
+2. ![](http://latex.codecogs.com/gif.latex?\$m$) is the size of each shard
+3. ![](http://latex.codecogs.com/gif.latex?\$k$) is the the swap-out batch size, i.e., the number of validators that will be swapped out at a given time in a given epoch. 
 
 **Outputs:**
 
-1. Set $k =log{n \over m}$ 
-2. For each shard $j$,
-  - Generate two seeds $s_{j,rnd_e}$ and $s_{0,rnde}$ using the generated random output from DRP.
-  - Use $s_{j,rnd_e}$ and $s_{0,rnde}$ to get the permutation $\pi_{j,e}$ and $\pi_{0,e}$ and divide nodes into buckets of size $k$. In this way, the node to swap-batch mapping is determined.
-  - $\pi_{j,e}$ is used for current nodes and $\pi_{0,e}$ is used for the newly joined nodes.
-  - Each batch waits $\Delta$ and then starts the swap. 
+1. Set ![](http://latex.codecogs.com/gif.latex?k\=\log{n\\over\\\\m})
+2. For each shard ![](http://latex.codecogs.com/gif.latex?\$j$),
+  - Generate two seeds ![](http://latex.codecogs.com/gif.latex?\$s_{j,rnd_e}$) and ![](http://latex.codecogs.com/gif.latex?\$s_{0,rnde}$) using the generated random output from DRP.
+  - Use ![](http://latex.codecogs.com/gif.latex?\$s_{j,rnd_e}$) and ![](http://latex.codecogs.com/gif.latex?\$s_{0,rnde}$) to get the permutation ![](http://latex.codecogs.com/gif.latex?\$\\pi_{j,e}$) and ![](http://latex.codecogs.com/gif.latex?$\\pi_{0,e}$) and divide nodes into buckets of size ![](http://latex.codecogs.com/gif.latex?\$k$) . In this way, the node to swap-batch mapping is determined.
+  - ![](http://latex.codecogs.com/gif.latex?\$\\pi_{j,e}$) is used for current nodes and ![](http://latex.codecogs.com/gif.latex?$\\pi_{0,e}$) is used for the newly joined nodes.
+  - Each batch waits ![](http://latex.codecogs.com/gif.latex?\$\\Delta$)  and then starts the swap. 
 
 ---
 
 ### Analysis
-In the algorithm presented above, we ensured safety of Byzantine Fault Tolerance (BFT) consensus in each shard transition. The reasons are in two folds. Firstly,  we made sure the size of the group. There are least $2/3$ shard size validators running consensus. Secondly, safety against adversary is also guaranteed as per epoch randomness is used to generate the permutation of validators batches.
+In the algorithm presented above, we ensured safety of Byzantine Fault Tolerance (BFT) consensus in each shard transition. The reasons are in two folds. Firstly,  we made sure the size of the group. There are least ![](http://latex.codecogs.com/gif.latex?\$2/3$) shard size validators running consensus. Secondly, safety against adversary is also guaranteed as per epoch randomness is used to generate the permutation of validators batches.
 
 ## Inter-Shard Transactions
 The mechanism that supports inter-shard transactions is critical in the system, since transactions are likely to happen cross shards. We introduce a Byzantine Shard Atomic Commit (Atomix) protocol to ensures the atomicity cross shards. This protocol prevents double spending and keeps the consistency of transactions. Our design is a variant of the Omniledger algorithm. [8]
@@ -229,16 +229,16 @@ Another issue current blockchains are facing is the rapid expanding size of the 
 
 **Inputs:**
 
-- $e$ is the current epoch
-- $j$ is the current shard
+- ![](http://latex.codecogs.com/gif.latex?\$e$) is the current epoch
+- ![](http://latex.codecogs.com/gif.latex?\$j$) is the current shard
 
-**Output:** the micro state block $msb_{j,e}$ for $j$ in $e$
+**Output:** the micro state block ![](http://latex.codecogs.com/gif.latex?\$msb_{j,e}$) for ![](http://latex.codecogs.com/gif.latex?\$j$) in ![](http://latex.codecogs.com/gif.latex?\$e$)
 
-1. When the epoch $e$ ends, the shard leader stores all transactions of e in a Merkle tree [14].
-2. The shard leader hashes the Merkle tree’s root, denoted by $h$, and puts $h$ in $Header(msb_{j,e})$.
-3. Validators run consensus on the $Header(msb_{j,e})$, while there is not any regular blocks pending.
-4. If the correctness of $Header(msb_{j,e})$ is verified, the shard leader stores the approved header in the shard’s blockchain.
-5. At the end of epoch $e+1$, all the nodes drop the body of $msb_{j,e-1}$ and keep the regular blocks of $e$.
+1. When the epoch ![](http://latex.codecogs.com/gif.latex?\$e$) ends, the shard leader stores all transactions of ![](http://latex.codecogs.com/gif.latex?\$e$) in a Merkle tree [14].
+2. The shard leader hashes the Merkle tree’s root, denoted by ![](http://latex.codecogs.com/gif.latex?\$h$), and puts ![](http://latex.codecogs.com/gif.latex?\$h$) in ![](http://latex.codecogs.com/gif.latex?\$Header(msb_{j,e})$).
+3. Validators run consensus on the ![](http://latex.codecogs.com/gif.latex?\$Header(msb_{j,e})$), while there is not any regular blocks pending.
+4. If the correctness of ![](http://latex.codecogs.com/gif.latex?\$Header(msb_{j,e})$) is verified, the shard leader stores the approved header in the shard’s blockchain.
+5. At the end of epoch ![](http://latex.codecogs.com/gif.latex?\$e+1$), all the nodes drop the body of ![](http://latex.codecogs.com/gif.latex?\$msb_{j,e-1}$) and keep the regular blocks of ![](http://latex.codecogs.com/gif.latex?\$e$).
 
 ---
 
